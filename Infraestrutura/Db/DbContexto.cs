@@ -1,30 +1,31 @@
-using MinimalApi.Infraestrutura.Db;
-using MinimalApi.DTOs;
 using Microsoft.EntityFrameworkCore;
+using MinimalApi.Dominio.Entidades;
 
-var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<DbContexto>(options =>
+namespace MinimalApi.Infraestrutura.Db;
+
+public class DbContexto : DbContext
 {
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("mysql"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("mysql"))
-    );
-});
-
-public DbSet<Administrador> Administradores { get; set; } = default!;
-
-protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-{
-    if (!optionsBuilder.IsConfigured)
+    private readonly IConfiguration _configuracaoAppSettings;
+    public DbContexto(IConfiguration configuracaoAppSettings)
     {
-        var stringConexao = _configuracaoAppSettings.GetConnectionString("mysql")?.ToString();
-        if (!string.IsNullOrEmpty(stringConexao))
+        _configuracaoAppSettings = configuracaoAppSettings;
+    }
+
+    public DbSet<Administrador> Administradores { get; set; } = default!;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if(!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseMySql(
-                stringConexao,
-                ServerVersion.AutoDetect(stringConexao)
-            );
+            var stringConexao = _configuracaoAppSettings.GetConnectionString("mysql")?.ToString();
+            if(!string.IsNullOrEmpty(stringConexao))
+            {
+                optionsBuilder.UseMySql(
+                    stringConexao,
+                    ServerVersion.AutoDetect(stringConexao)
+                );
+            }
         }
     }
 }
